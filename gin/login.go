@@ -9,6 +9,8 @@ import (
 	"os"
 )
 
+const ID_TOKEN = "id_token"
+
 type LineLogin struct {
 	UnauthorizedPath string
 	CallbackPath     string
@@ -47,7 +49,7 @@ func (lineLogin *LineLogin) AuthMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		session := sessions.Default(c)
 
-		if session.Get("id_token") == nil {
+		if session.Get(ID_TOKEN) == nil {
 			c.Redirect(http.StatusFound, lineLogin.UnauthorizedPath)
 			c.Abort()
 		}
@@ -65,7 +67,7 @@ func (lineLogin *LineLogin) Login(c *gin.Context) {
 
 func (lineLogin *LineLogin) Logout(c *gin.Context) {
 	session := sessions.Default(c)
-	session.Delete("id_token")
+	session.Delete(ID_TOKEN)
 	session.Save()
 }
 
@@ -78,6 +80,6 @@ func (lineLogin *LineLogin) Callback(r *gin.Engine) {
 			panic(err)
 		}
 
-		c.JSON(200, gin.H{"id_token": user.IdToken})
+		c.JSON(200, gin.H{ID_TOKEN: user.IdToken})
 	})
 }
