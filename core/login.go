@@ -1,4 +1,4 @@
-package line_login
+package line_login_core
 
 import (
 	"crypto/rand"
