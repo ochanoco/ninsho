@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
@@ -22,7 +23,17 @@ type Config struct {
 	RedirectURL  string
 }
 
+type TokenResp struct {
+	AccessToken  string `json:"access_token"`
+	ExpiresIn    int    `json:"expires_in"`
+	IdToken      string `json:"id_token"`
+	RefreshToken string `json:"refresh_token"`
+	Scope        string `json:"scope"`
+	TokenType    string `json:"token_type"`
+}
+
 func main() {
+	var tokenResp TokenResp
 	var config Config
 	config.ClientID = os.Getenv("CLIENT_ID")
 	config.ClientSecret = os.Getenv("TOKEN")
@@ -51,7 +62,7 @@ func main() {
 		TokenURL,
 		strings.NewReader(values.Encode()),
 	)
-	
+
 	if err != nil {
 		panic(err)
 	}
@@ -69,6 +80,13 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	fmt.Println(string(b))
+
+	err = json.Unmarshal(b, &tokenResp)
+
+	if err != nil {
+		panic(err)
+	}
+
+	fmt.Printf("%v", tokenResp)
 
 }
