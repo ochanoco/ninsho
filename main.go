@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"crypto/rand"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -11,19 +12,25 @@ import (
 	"strings"
 )
 
-const AuthURL = "https://access.line.me/oauth2/v2.1/authorize?response_type=code&client_id=%s&redirect_uri=%s&state=%s&scope=profile openid&nonce=%s"
-const TokenURL = "https://api.line.me/oauth2/v2.1/token"
+const AUTH_URL = "https://access.line.me/oauth2/v2.1/authorize?response_type=code&client_id=%s&redirect_uri=%s&state=%s&scope=profile openid&nonce=%s"
+const TOKEN_URL = "https://api.line.me/oauth2/v2.1/token"
 
 // const CallBackURL = "http://%s/callback?code=%s&state=%s&friendship_status_changed=true"
 // const CallBackErrURL = "https://%s/callback?error=access_denied&error_description=The+resource+owner+denied+the+request.&state=%s"
 
-type Config struct {
+type Provider struct {
 	ClientID     string
 	ClientSecret string
 	RedirectURL  string
 }
 
-type TokenResp struct {
+type Session struct {
+	State    string
+	Nonce    string
+	provider *Provider
+}
+
+type User struct {
 	AccessToken  string `json:"access_token"`
 	ExpiresIn    int    `json:"expires_in"`
 	IdToken      string `json:"id_token"`
@@ -32,39 +39,50 @@ type TokenResp struct {
 	TokenType    string `json:"token_type"`
 }
 
-func main() {
-	var tokenResp TokenResp
-	var config Config
-	config.ClientID = os.Getenv("CLIENT_ID")
-	config.ClientSecret = os.Getenv("TOKEN")
-	config.RedirectURL = "http://localhost:3000/api/auth/callback/line"
+func secureRandom(b int) string {
+	k := make([]byte, b)
+	if _, err := rand.Read(k); err != nil {
+		panic(err)
+	}
+	return fmt.Sprintf("%x", k)
+}
 
-	state := "12345"
-	nonce := "09876"
+func NewSession(provider *Provider) Session {
+	var session Session
 
-	authUrl := fmt.Sprintf(AuthURL, config.ClientID, config.RedirectURL, state, nonce)
-	fmt.Println(authUrl)
+	session.Nonce = secureRandom(32)
+	session.State = secureRandom(32)
 
-	reader := bufio.NewReader(os.Stdin)
-	code, _ := reader.ReadString('\n')
+	session.provider = provider
 
-	code = strings.Replace(code, "\n", "", -1)
+	return session
+}
+
+func (session *Session) AuthURL() string {
+	return fmt.Sprintf(AUTH_URL, session.provider.ClientID, session.provider.RedirectURL, session.State, session.Nonce)
+}
+
+func (session *Session) GetUser(code string) (*User, error) {
+	var user User
+
+	provider := session.provider
 
 	values := url.Values{}
+
 	values.Add("grant_type", "authorization_code")
 	values.Add("code", code)
-	values.Add("client_id", config.ClientID)
-	values.Add("client_secret", config.ClientSecret)
-	values.Add("redirect_uri", config.RedirectURL)
+	values.Add("client_id", provider.ClientID)
+	values.Add("client_secret", provider.ClientSecret)
+	values.Add("redirect_uri", provider.RedirectURL)
 
 	req, err := http.NewRequest(
 		"POST",
-		TokenURL,
+		TOKEN_URL,
 		strings.NewReader(values.Encode()),
 	)
 
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
@@ -72,21 +90,45 @@ func main() {
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 	defer resp.Body.Close()
 
 	b, err := io.ReadAll(resp.Body)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 
-	err = json.Unmarshal(b, &tokenResp)
+	err = json.Unmarshal(b, &user)
 
 	if err != nil {
 		panic(err)
 	}
 
-	fmt.Printf("%v", tokenResp)
+	return &user, nil
+}
 
+func main() {
+	var provider Provider
+
+	provider.ClientID = os.Getenv("CLIENT_ID")
+	provider.ClientSecret = os.Getenv("TOKEN")
+	provider.RedirectURL = "http://localhost:3000/api/auth/callback/line"
+
+	session := NewSession(&provider)
+	authURL := session.AuthURL()
+
+	fmt.Printf("Open this URL in your browser:\n%v\n\nEnter Code:", authURL)
+
+	reader := bufio.NewReader(os.Stdin)
+	code, _ := reader.ReadString('\n')
+	code = strings.Replace(code, "\n", "", -1)
+
+	user, err := session.GetUser(code)
+
+	if err != nil {
+		panic(err)
+	}
+
+	fmt.Printf("User: %v", user)
 }
