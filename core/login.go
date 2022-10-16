@@ -12,6 +12,7 @@ import (
 
 const AUTH_URL = "https://access.line.me/oauth2/v2.1/authorize?response_type=code&client_id=%s&redirect_uri=%s&state=%s&scope=profile openid&nonce=%s"
 const TOKEN_URL = "https://api.line.me/oauth2/v2.1/token"
+const VERIFY_URL = "https://api.line.me/oauth2/v2.1/verify"
 
 const TOKEN_LEN = 32
 
@@ -27,13 +28,26 @@ type Session struct {
 	provider *Provider
 }
 
-type User struct {
+type Token struct {
 	AccessToken  string `json:"access_token"`
 	ExpiresIn    int    `json:"expires_in"`
 	IdToken      string `json:"id_token"`
 	RefreshToken string `json:"refresh_token"`
 	Scope        string `json:"scope"`
 	TokenType    string `json:"token_type"`
+}
+
+type JWT struct {
+	Iss     string   `json:"iss"`
+	Sub     string   `json:"sub"`
+	Aud     string   `json:"aud"`
+	Exp     int      `json:"exp"`
+	Iat     int      `json:"iat"`
+	Nonce   string   `json:"nonce"`
+	Amr     []string `json:"amr"`
+	Name    string   `json:"name"`
+	Picture string   `json:"picture"`
+	Email   string   `json:"email"`
 }
 
 func secureRandom(b int) (string, error) {
@@ -69,8 +83,9 @@ func (session *Session) AuthURL() string {
 	return fmt.Sprintf(AUTH_URL, session.provider.ClientID, session.provider.RedirectURL, session.State, session.Nonce)
 }
 
-func (session *Session) GetUser(code string) (*User, error) {
-	var user User
+func (session *Session) GetUser(code string) (*JWT, error) {
+	var jwt JWT
+	var token Token
 
 	provider := session.provider
 
@@ -106,11 +121,46 @@ func (session *Session) GetUser(code string) (*User, error) {
 		return nil, err
 	}
 
-	err = json.Unmarshal(b, &user)
+	err = json.Unmarshal(b, &token)
 
 	if err != nil {
 		panic(err)
 	}
 
-	return &user, nil
+	values = url.Values{}
+
+	values.Add("id_token", token.IdToken)
+	values.Add("client_id", provider.ClientID)
+
+	req, err = http.NewRequest(
+		"POST",
+		VERIFY_URL,
+		strings.NewReader(values.Encode()),
+	)
+
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+
+	client = &http.Client{}
+	resp, err = client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	b, err = io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	err = json.Unmarshal(b, &jwt)
+
+	if err != nil {
+		panic(err)
+	}
+
+	return &jwt, nil
 }

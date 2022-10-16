@@ -13,7 +13,7 @@ func main() {
 
 	provider.ClientID = os.Getenv("CLIENT_ID")
 	provider.ClientSecret = os.Getenv("TOKEN")
-	provider.RedirectURL = "http://localhost:3000/api/auth/callback/line"
+	provider.RedirectURL = "http://127.0.0.1:8080/callback"
 
 	session, err := line_login_core.NewSession(&provider)
 	if err != nil {
@@ -33,11 +33,11 @@ func main() {
 
 	code = strings.Replace(code, "\n", "", -1)
 
-	user, err := session.GetUser(code)
+	jwt, err := session.GetUser(code)
 
 	if err != nil {
 		panic(err)
 	}
 
-	fmt.Printf("User: %v", user)
+	fmt.Printf("User: %v", jwt)
 }
