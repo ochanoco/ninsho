@@ -1,3 +1,3 @@
-module example.com/m/v2
+module github.com/ochanoco/gin-line-login
 
 go 1.18
