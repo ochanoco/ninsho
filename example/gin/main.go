@@ -9,11 +9,15 @@ import (
 )
 
 func main() {
-	lineLogin := gin_line_login.DefaultLineLogin()
-
 	r := gin.Default()
+
 	store := cookie.NewStore([]byte("secret"))
 	r.Use(sessions.Sessions("mysession", store))
+
+	lineLogin, err := gin_line_login.DefaultLineLogin(r)
+	if err != nil {
+		panic(err)
+	}
 
 	r.GET("/", lineLogin.AuthMiddleware(), func(c *gin.Context) {
 		c.JSON(200, gin.H{"message": "loggined!"})

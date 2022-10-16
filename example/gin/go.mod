@@ -2,6 +2,8 @@ module github.com/ochanoco/gin-line-login-example
 
 go 1.18
 
+require line_login_core v0.0.0
+
 require gin_line_login v0.0.0
 
 require (
@@ -25,5 +27,7 @@ require (
 	golang.org/x/sys v0.0.0-20220408201424-a24fb2fb8a0f // indirect
 	gopkg.in/yaml.v2 v2.2.8 // indirect
 )
+
+replace line_login_core => ../../core
 
 replace gin_line_login => ../../gin
