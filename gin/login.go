@@ -3,13 +3,14 @@ package gin_line_login
 import (
 	"net/http"
 
-	"github.com/gin-contrib/sessions"
-	"github.com/gin-gonic/gin"
 	"line_login_core"
 	"os"
+
+	"github.com/gin-contrib/sessions"
+	"github.com/gin-gonic/gin"
 )
 
-const ID_TOKEN = "id_token"
+const userId = "userId"
 
 type LineLogin struct {
 	UnauthorizedPath string
@@ -22,7 +23,7 @@ func NewLineLogin(r *gin.Engine, unauthorized, callback string) (*LineLogin, err
 
 	provider.ClientID = os.Getenv("CLIENT_ID")
 	provider.ClientSecret = os.Getenv("TOKEN")
-	provider.RedirectURL = "http://127.0.0.1:8080/callback"
+	provider.RedirectURL = "http://127.0.0.1:8080" + callback
 
 	session, err := line_login_core.NewSession(&provider)
 	if err != nil {
@@ -49,7 +50,7 @@ func (lineLogin *LineLogin) AuthMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		session := sessions.Default(c)
 
-		if session.Get(ID_TOKEN) == nil {
+		if session.Get(userId) == nil {
 			c.Redirect(http.StatusFound, lineLogin.UnauthorizedPath)
 			c.Abort()
 		}
@@ -67,7 +68,7 @@ func (lineLogin *LineLogin) Login(c *gin.Context) {
 
 func (lineLogin *LineLogin) Logout(c *gin.Context) {
 	session := sessions.Default(c)
-	session.Delete(ID_TOKEN)
+	session.Delete(userId)
 	session.Save()
 }
 
@@ -75,11 +76,11 @@ func (lineLogin *LineLogin) Callback(r *gin.Engine) {
 	r.GET(lineLogin.CallbackPath, func(c *gin.Context) {
 		code := c.Query("code")
 
-		user, err := lineLogin.LineLoginSession.GetUser(code)
+		jwt, err := lineLogin.LineLoginSession.GetUser(code)
 		if err != nil {
 			panic(err)
 		}
 
-		c.JSON(200, gin.H{ID_TOKEN: user.IdToken})
+		c.JSON(200, gin.H{userId: jwt.Sub})
 	})
 }

@@ -25,7 +25,6 @@ func main() {
 
 	r.GET("/login", func(c *gin.Context) {
 		lineLogin.Login(c)
-		c.JSON(200, gin.H{"message": "login"})
 	})
 
 	r.GET("/logout", func(c *gin.Context) {
