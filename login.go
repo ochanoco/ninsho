@@ -13,6 +13,8 @@ import (
 const AUTH_URL = "https://access.line.me/oauth2/v2.1/authorize?response_type=code&client_id=%s&redirect_uri=%s&state=%s&scope=profile openid&nonce=%s"
 const TOKEN_URL = "https://api.line.me/oauth2/v2.1/token"
 
+const TOKEN_LEN = 32
+
 type Provider struct {
 	ClientID     string
 	ClientSecret string
@@ -46,13 +48,13 @@ func NewSession(provider *Provider) (Session, error) {
 	var session Session
 	var err error
 
-	session.Nonce, err = secureRandom(32)
+	session.Nonce, err = secureRandom(TOKEN_LEN)
 
 	if err != nil {
 		return session, err
 	}
 
-	session.State, err = secureRandom(32)
+	session.State, err = secureRandom(TOKEN_LEN)
 
 	if err != nil {
 		return session, err
