@@ -1,22 +1,17 @@
-package main
+package line_login
 
 import (
-	"bufio"
 	"crypto/rand"
 	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
 	"net/url"
-	"os"
 	"strings"
 )
 
 const AUTH_URL = "https://access.line.me/oauth2/v2.1/authorize?response_type=code&client_id=%s&redirect_uri=%s&state=%s&scope=profile openid&nonce=%s"
 const TOKEN_URL = "https://api.line.me/oauth2/v2.1/token"
-
-// const CallBackURL = "http://%s/callback?code=%s&state=%s&friendship_status_changed=true"
-// const CallBackErrURL = "https://%s/callback?error=access_denied&error_description=The+resource+owner+denied+the+request.&state=%s"
 
 type Provider struct {
 	ClientID     string
@@ -106,29 +101,4 @@ func (session *Session) GetUser(code string) (*User, error) {
 	}
 
 	return &user, nil
-}
-
-func main() {
-	var provider Provider
-
-	provider.ClientID = os.Getenv("CLIENT_ID")
-	provider.ClientSecret = os.Getenv("TOKEN")
-	provider.RedirectURL = "http://localhost:3000/api/auth/callback/line"
-
-	session := NewSession(&provider)
-	authURL := session.AuthURL()
-
-	fmt.Printf("Open this URL in your browser:\n%v\n\nEnter Code:", authURL)
-
-	reader := bufio.NewReader(os.Stdin)
-	code, _ := reader.ReadString('\n')
-	code = strings.Replace(code, "\n", "", -1)
-
-	user, err := session.GetUser(code)
-
-	if err != nil {
-		panic(err)
-	}
-
-	fmt.Printf("User: %v", user)
 }
