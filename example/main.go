@@ -15,7 +15,11 @@ func main() {
 	provider.ClientSecret = os.Getenv("TOKEN")
 	provider.RedirectURL = "http://localhost:3000/api/auth/callback/line"
 
-	session := line_login.NewSession(&provider)
+	session, err := line_login.NewSession(&provider)
+	if err != nil {
+		panic(err)
+	}
+
 	authURL := session.AuthURL()
 
 	fmt.Printf("Open this URL in your browser:\n%v\n\nEnter Code:", authURL)

@@ -34,23 +34,33 @@ type User struct {
 	TokenType    string `json:"token_type"`
 }
 
-func secureRandom(b int) string {
+func secureRandom(b int) (string, error) {
 	k := make([]byte, b)
 	if _, err := rand.Read(k); err != nil {
-		panic(err)
+		return "", err
 	}
-	return fmt.Sprintf("%x", k)
+	return fmt.Sprintf("%x", k), nil
 }
 
-func NewSession(provider *Provider) Session {
+func NewSession(provider *Provider) (Session, error) {
 	var session Session
+	var err error
 
-	session.Nonce = secureRandom(32)
-	session.State = secureRandom(32)
+	session.Nonce, err = secureRandom(32)
+
+	if err != nil {
+		return session, err
+	}
+
+	session.State, err = secureRandom(32)
+
+	if err != nil {
+		return session, err
+	}
 
 	session.provider = provider
 
-	return session
+	return session, nil
 }
 
 func (session *Session) AuthURL() string {
