@@ -23,8 +23,8 @@ func NewLineLogin(r *gin.Engine, unauthorized, callback, afterAuth string) (*Lin
 	var provider line_login_core.Provider
 
 	provider.ClientID = os.Getenv("CLIENT_ID")
-	provider.ClientSecret = os.Getenv("TOKEN")
-	provider.RedirectURL = "http://127.0.0.1:8080" + callback
+	provider.ClientSecret = os.Getenv("CLIENT_SECRET")
+	provider.RedirectURL = os.Getenv("REDIRECT_URL") + callback
 
 	session, err := line_login_core.NewSession(&provider)
 	if err != nil {
