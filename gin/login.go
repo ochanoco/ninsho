@@ -15,10 +15,11 @@ const userId = "userId"
 type LineLogin struct {
 	UnauthorizedPath string
 	CallbackPath     string
+	AfterAuthPath    string
 	LineLoginSession *line_login_core.Session
 }
 
-func NewLineLogin(r *gin.Engine, unauthorized, callback string) (*LineLogin, error) {
+func NewLineLogin(r *gin.Engine, unauthorized, callback, afterAuth string) (*LineLogin, error) {
 	var provider line_login_core.Provider
 
 	provider.ClientID = os.Getenv("CLIENT_ID")
@@ -33,6 +34,7 @@ func NewLineLogin(r *gin.Engine, unauthorized, callback string) (*LineLogin, err
 	lineLogin := LineLogin{
 		UnauthorizedPath: unauthorized,
 		CallbackPath:     callback,
+		AfterAuthPath:    afterAuth,
 	}
 
 	lineLogin.LineLoginSession = &session
@@ -43,7 +45,7 @@ func NewLineLogin(r *gin.Engine, unauthorized, callback string) (*LineLogin, err
 }
 
 func DefaultLineLogin(r *gin.Engine) (*LineLogin, error) {
-	return NewLineLogin(r, "/unauthorized", "/callback")
+	return NewLineLogin(r, "/unauthorized", "/callback", "/")
 }
 
 func (lineLogin *LineLogin) AuthMiddleware() gin.HandlerFunc {
@@ -51,7 +53,7 @@ func (lineLogin *LineLogin) AuthMiddleware() gin.HandlerFunc {
 		session := sessions.Default(c)
 
 		if session.Get(userId) == nil {
-			c.Redirect(http.StatusFound, lineLogin.UnauthorizedPath)
+			c.Redirect(http.StatusTemporaryRedirect, lineLogin.UnauthorizedPath)
 			c.Abort()
 		}
 
@@ -62,7 +64,7 @@ func (lineLogin *LineLogin) AuthMiddleware() gin.HandlerFunc {
 func (lineLogin *LineLogin) Login(c *gin.Context) {
 	url := lineLogin.LineLoginSession.AuthURL()
 
-	c.Redirect(http.StatusMovedPermanently, url)
+	c.Redirect(http.StatusTemporaryRedirect, url)
 	c.Abort()
 }
 
@@ -81,6 +83,11 @@ func (lineLogin *LineLogin) Callback(r *gin.Engine) {
 			panic(err)
 		}
 
-		c.JSON(200, gin.H{userId: jwt.Sub})
+		session := sessions.Default(c)
+
+		session.Set(userId, jwt.Sub)
+		session.Save()
+
+		c.Redirect(http.StatusTemporaryRedirect, lineLogin.AfterAuthPath)
 	})
 }
