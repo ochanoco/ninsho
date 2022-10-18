@@ -25,7 +25,7 @@ type Provider struct {
 type Session struct {
 	State    string
 	Nonce    string
-	provider *Provider
+	Provider *Provider
 }
 
 type Token struct {
@@ -74,20 +74,20 @@ func NewSession(provider *Provider) (Session, error) {
 		return session, err
 	}
 
-	session.provider = provider
+	session.Provider = provider
 
 	return session, nil
 }
 
 func (session *Session) AuthURL() string {
-	return fmt.Sprintf(AUTH_URL, session.provider.ClientID, session.provider.RedirectURL, session.State, session.Nonce)
+	return fmt.Sprintf(AUTH_URL, session.Provider.ClientID, session.Provider.RedirectURL, session.State, session.Nonce)
 }
 
 func (session *Session) GetUser(code string) (*JWT, error) {
 	var jwt JWT
 	var token Token
 
-	provider := session.provider
+	provider := session.Provider
 
 	values := url.Values{}
 
