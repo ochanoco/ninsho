@@ -11,10 +11,11 @@ import (
 )
 
 const AUTH_URL = "https://access.line.me/oauth2/v2.1/authorize?response_type=code&client_id=%s&redirect_uri=%s&state=%s&scope=profile openid&nonce=%s"
-const TOKEN_URL = "https://api.line.me/oauth2/v2.1/token"
-const VERIFY_URL = "https://api.line.me/oauth2/v2.1/verify"
 
-const TOKEN_LEN = 32
+var TOKEN_URL = "https://api.line.me/oauth2/v2.1/token"
+var VERIFY_URL = "https://api.line.me/oauth2/v2.1/verify"
+
+var TOKEN_LEN = 32
 
 type Provider struct {
 	ClientID     string
