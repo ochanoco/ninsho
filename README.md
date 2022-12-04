@@ -20,7 +20,9 @@ Please read [examples](./example/).
 Some parameters are needed to set as environment variables.
 
 ```sh
-provider.ClientID = os.Getenv("CLIENT_ID")
-provider.ClientSecret = os.Getenv("CLIENT_SECRET")
-provider.RedirectURL = os.Getenv("REDIRECT_URL") + callback
+export CLIENT_ID="xxx"
+export CLIENT_SECRET="xxx"
+
+# "xxx/callback"
+export REDIRECT_URI="xxx"
 ```
