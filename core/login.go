@@ -20,7 +20,7 @@ var TOKEN_LEN = 32
 type Provider struct {
 	ClientID     string
 	ClientSecret string
-	RedirectURL  string
+	RedirectUri  string
 }
 
 type Session struct {
@@ -81,7 +81,7 @@ func NewSession(provider *Provider) (Session, error) {
 }
 
 func (session *Session) AuthURL() string {
-	return fmt.Sprintf(AUTH_URL, session.Provider.ClientID, session.Provider.RedirectURL, session.State, session.Nonce)
+	return fmt.Sprintf(AUTH_URL, session.Provider.ClientID, session.Provider.RedirectUri, session.State, session.Nonce)
 }
 
 func (session *Session) GetUser(code string) (*JWT, error) {
@@ -96,7 +96,7 @@ func (session *Session) GetUser(code string) (*JWT, error) {
 	values.Add("code", code)
 	values.Add("client_id", provider.ClientID)
 	values.Add("client_secret", provider.ClientSecret)
-	values.Add("redirect_uri", provider.RedirectURL)
+	values.Add("redirect_uri", provider.RedirectUri)
 
 	req, err := http.NewRequest(
 		"POST",

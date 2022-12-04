@@ -9,7 +9,7 @@ func sampleSession() Session {
 
 	provider.ClientID = "12345"
 	provider.ClientSecret = ""
-	provider.RedirectURL = "http://127.0.0.1:8080/callback"
+	provider.RedirectUri = "http://127.0.0.1:8080/callback"
 
 	session, err := NewSession(&provider)
 	if err != nil {

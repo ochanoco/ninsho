@@ -13,7 +13,7 @@ func main() {
 
 	provider.ClientID = os.Getenv("CLIENT_ID")
 	provider.ClientSecret = os.Getenv("TOKEN")
-	provider.RedirectURL = "http://127.0.0.1:8080/callback"
+	provider.RedirectUri = "http://127.0.0.1:8080/callback"
 
 	session, err := line_login_core.NewSession(&provider)
 	if err != nil {

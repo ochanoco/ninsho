@@ -24,7 +24,7 @@ func NewLineLogin(r *gin.Engine, unauthorized, callback, afterAuth string) (*Lin
 
 	provider.ClientID = os.Getenv("CLIENT_ID")
 	provider.ClientSecret = os.Getenv("CLIENT_SECRET")
-	provider.RedirectURL = os.Getenv("REDIRECT_URL") + callback
+	provider.RedirectUri = os.Getenv("REDIRECT_URI") + callback
 
 	session, err := line_login_core.NewSession(&provider)
 	if err != nil {
