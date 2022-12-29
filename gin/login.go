@@ -3,7 +3,7 @@ package gin_line_login
 import (
 	"net/http"
 
-	"line_login_core"
+	core "line_login_core"
 	"os"
 
 	"github.com/gin-contrib/sessions"
@@ -16,17 +16,12 @@ type LineLogin struct {
 	UnauthorizedPath string
 	CallbackPath     string
 	AfterAuthPath    string
-	LineLoginSession *line_login_core.Session
+	Domain           string
+	LineLoginSession *core.Session
 }
 
-func NewLineLogin(r *gin.Engine, unauthorized, callback, afterAuth string) (*LineLogin, error) {
-	var provider line_login_core.Provider
-
-	provider.ClientID = os.Getenv("CLIENT_ID")
-	provider.ClientSecret = os.Getenv("CLIENT_SECRET")
-	provider.RedirectUri = os.Getenv("REDIRECT_URI") + callback
-
-	session, err := line_login_core.NewSession(&provider)
+func NewLineLogin(r *gin.Engine, provider *core.Provider, domain, unauthorized, callback, afterAuth string) (*LineLogin, error) {
+	session, err := core.NewSession(provider)
 	if err != nil {
 		return nil, err
 	}
@@ -35,6 +30,7 @@ func NewLineLogin(r *gin.Engine, unauthorized, callback, afterAuth string) (*Lin
 		UnauthorizedPath: unauthorized,
 		CallbackPath:     callback,
 		AfterAuthPath:    afterAuth,
+		Domain:           domain,
 	}
 
 	lineLogin.LineLoginSession = &session
@@ -44,8 +40,20 @@ func NewLineLogin(r *gin.Engine, unauthorized, callback, afterAuth string) (*Lin
 	return &lineLogin, nil
 }
 
+func NewLineLoginWithEnvironment(r *gin.Engine, unauthorized, callback, afterAuth string) (*LineLogin, error) {
+	var provider core.Provider
+
+	domain := os.Getenv("DOMAIN")
+
+	provider.ClientID = os.Getenv("CLIENT_ID")
+	provider.ClientSecret = os.Getenv("CLIENT_SECRET")
+	provider.RedirectUri = domain + callback
+
+	return NewLineLogin(r, &provider, domain, unauthorized, callback, afterAuth)
+}
+
 func DefaultLineLogin(r *gin.Engine) (*LineLogin, error) {
-	return NewLineLogin(r, "/unauthorized", "/callback", "/")
+	return NewLineLoginWithEnvironment(r, "/unauthorized", "/callback", "/")
 }
 
 func (lineLogin *LineLogin) AuthMiddleware() gin.HandlerFunc {
