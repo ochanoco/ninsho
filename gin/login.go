@@ -43,10 +43,10 @@ func NewLineLogin(r *gin.Engine, provider *core.Provider, domain, unauthorized, 
 func NewLineLoginWithEnvironment(r *gin.Engine, unauthorized, callback, afterAuth string) (*LineLogin, error) {
 	var provider core.Provider
 
-	domain := os.Getenv("DOMAIN")
+	domain := os.Getenv("LINE_LOGIN_BASE")
 
-	provider.ClientID = os.Getenv("CLIENT_ID")
-	provider.ClientSecret = os.Getenv("CLIENT_SECRET")
+	provider.ClientID = os.Getenv("LINE_LOGIN_CLIENT_ID")
+	provider.ClientSecret = os.Getenv("LINE_LOGIN_CLIENT_SECRET")
 	provider.RedirectUri = domain + callback
 
 	return NewLineLogin(r, &provider, domain, unauthorized, callback, afterAuth)
