@@ -20,7 +20,7 @@ type LineLogin struct {
 	LineLoginSession *core.Session
 }
 
-func NewLineLogin(r *gin.Engine, provider *core.Provider, domain, unauthorized, callback, afterAuth string) (*LineLogin, error) {
+func NewLineLogin(r *gin.RouterGroup, provider *core.Provider, domain, unauthorized, callback, afterAuth string) (*LineLogin, error) {
 	session, err := core.NewSession(provider)
 	if err != nil {
 		return nil, err
@@ -40,7 +40,7 @@ func NewLineLogin(r *gin.Engine, provider *core.Provider, domain, unauthorized, 
 	return &lineLogin, nil
 }
 
-func NewLineLoginWithEnvironment(r *gin.Engine, unauthorized, callback, afterAuth string) (*LineLogin, error) {
+func NewLineLoginWithEnvironment(r *gin.RouterGroup, unauthorized, callback, afterAuth string) (*LineLogin, error) {
 	var provider core.Provider
 
 	domain := os.Getenv("LINE_LOGIN_BASE")
@@ -52,7 +52,7 @@ func NewLineLoginWithEnvironment(r *gin.Engine, unauthorized, callback, afterAut
 	return NewLineLogin(r, &provider, domain, unauthorized, callback, afterAuth)
 }
 
-func DefaultLineLogin(r *gin.Engine) (*LineLogin, error) {
+func DefaultLineLogin(r *gin.RouterGroup) (*LineLogin, error) {
 	return NewLineLoginWithEnvironment(r, "/unauthorized", "/callback", "/")
 }
 
@@ -82,7 +82,7 @@ func (lineLogin *LineLogin) Logout(c *gin.Context) {
 	session.Save()
 }
 
-func (lineLogin *LineLogin) Callback(r *gin.Engine) {
+func (lineLogin *LineLogin) Callback(r *gin.RouterGroup) {
 	r.GET(lineLogin.CallbackPath, func(c *gin.Context) {
 		code := c.Query("code")
 
