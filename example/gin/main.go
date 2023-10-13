@@ -14,7 +14,7 @@ func main() {
 	store := cookie.NewStore([]byte("secret"))
 	r.Use(sessions.Sessions("mysession", store))
 
-	lineLogin, err := gin_line_login.DefaultLineLogin(r)
+	lineLogin, err := gin_line_login.DefaultLineLogin(&r.RouterGroup)
 	if err != nil {
 		panic(err)
 	}
