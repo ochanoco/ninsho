@@ -1,7 +1,9 @@
 package main
 
 import (
-	"gin_line_login"
+	"gin_ninsho"
+
+	"ninsho"
 
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-contrib/sessions/cookie"
@@ -14,21 +16,26 @@ func main() {
 	store := cookie.NewStore([]byte("secret"))
 	r.Use(sessions.Sessions("mysession", store))
 
-	lineLogin, err := gin_line_login.DefaultLineLogin(&r.RouterGroup)
+	_ninsho, err := gin_ninsho.DefaultNinshoGin(&r.RouterGroup, &ninsho.LINE_LOGIN)
 	if err != nil {
 		panic(err)
 	}
 
-	r.GET("/", lineLogin.AuthMiddleware(), func(c *gin.Context) {
-		c.JSON(200, gin.H{"message": "loggined!"})
+	r.GET("/", _ninsho.AuthMiddleware(), func(c *gin.Context) {
+		jwt, err := gin_ninsho.GetUser[ninsho.LINE_JWT](c)
+		if err != nil {
+			panic(err)
+		}
+
+		c.JSON(200, gin.H{"message": "loggined!", "user": jwt.Sub})
 	})
 
 	r.GET("/login", func(c *gin.Context) {
-		lineLogin.Login(c)
+		_ninsho.Login(c)
 	})
 
 	r.GET("/logout", func(c *gin.Context) {
-		lineLogin.Logout(c)
+		_ninsho.Logout(c)
 		c.JSON(200, gin.H{"message": "logout"})
 	})
 
