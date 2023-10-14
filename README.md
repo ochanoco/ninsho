@@ -1,11 +1,19 @@
-# line-login
+# ninsho
 
-All-inclusive compornent of LINE Login authentication.
+All-inclusive compornent of sso authentication.
 
-This project include as follows:
+Note that this is only for [ochano.co proxy](https://github.com/ochanoco/proxy), so it does not support other use cases.
 
-- **core library**
-  - core sso library for line login
+## Support platform
+### IdP
+
+- **line login**
+  - LINE Login is a service that allows users to log in to other apps and websites using their LINE account. 
+
+
+### Web Framework
+
+Using our supported web framework, you can use a special extension library for them. (Alternatively, you can also implement SSO using this library without supported web frameworks.)
 
 - **gin library**
   - sso library for [gin](https://gin-gonic.com/) (Golang Web appication framework)
@@ -15,14 +23,14 @@ This project include as follows:
 
 Please read [examples](./example/).
 
-## Note
+To use the default configuration in the extension for gin,
+you also need to set the environment variables as follows:
 
-Some parameters are needed to set as environment variables.
 
 ```sh
-export CLIENT_ID="xxx"
-export CLIENT_SECRET="xxx"
+export NINSHO_CLIENT_ID="xxxx"
+export NINSHO_CLIENT_SECRET="xxxx"
 
-# "xxx/callback"
-export REDIRECT_URI="xxx"
+# "xxxx/callback"
+export  NINSHO_REDIRECT_URI="xxxx"
 ```
