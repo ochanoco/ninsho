@@ -15,12 +15,12 @@ func main() {
 	provider.ClientSecret = os.Getenv("TOKEN")
 	provider.RedirectUri = "http://127.0.0.1:8080/callback"
 
-	n, err := ninsho.NewNinsho(&provider)
+	n, err := ninsho.NewNinsho(&provider, &ninsho.LINE_LOGIN)
 	if err != nil {
 		panic(err)
 	}
 
-	authURL := n.AuthURL()
+	authURL := n.GetAuthURL()
 
 	fmt.Printf("Open this URL in your browser:\n%v\n\nEnter Code:", authURL)
 
@@ -33,7 +33,7 @@ func main() {
 
 	code = strings.Replace(code, "\n", "", -1)
 
-	jwt, err := n.GetUser(code)
+	jwt, err := n.Auth(code)
 
 	if err != nil {
 		panic(err)

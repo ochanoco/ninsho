@@ -1,7 +1,6 @@
 package ninsho
 
 import (
-	"crypto/rand"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -10,12 +9,13 @@ import (
 	"strings"
 )
 
-const AUTH_URL = "https://access.line.me/oauth2/v2.1/authorize?response_type=code&client_id=%s&redirect_uri=%s&state=%s&scope=profile openid&nonce=%s"
-
-var TOKEN_URL = "https://api.line.me/oauth2/v2.1/token"
-var VERIFY_URL = "https://api.line.me/oauth2/v2.1/verify"
-
 var TOKEN_LEN = 32
+
+type IdP[T any] struct {
+	AuthURL   string
+	TokenURL  string
+	VerifyURL string
+}
 
 type Provider struct {
 	ClientID     string
@@ -23,10 +23,11 @@ type Provider struct {
 	RedirectUri  string
 }
 
-type Ninsho struct {
+type Ninsho[T any] struct {
 	State    string
 	Nonce    string
 	Provider *Provider
+	IdP      *IdP[T]
 }
 
 type Token struct {
@@ -38,29 +39,8 @@ type Token struct {
 	TokenType    string `json:"token_type"`
 }
 
-type JWT struct {
-	Iss     string   `json:"iss"`
-	Sub     string   `json:"sub"`
-	Aud     string   `json:"aud"`
-	Exp     int      `json:"exp"`
-	Iat     int      `json:"iat"`
-	Nonce   string   `json:"nonce"`
-	Amr     []string `json:"amr"`
-	Name    string   `json:"name"`
-	Picture string   `json:"picture"`
-	Email   string   `json:"email"`
-}
-
-func secureRandom(b int) (string, error) {
-	k := make([]byte, b)
-	if _, err := rand.Read(k); err != nil {
-		return "", err
-	}
-	return fmt.Sprintf("%x", k), nil
-}
-
-func NewNinsho(provider *Provider) (Ninsho, error) {
-	var _ninsho Ninsho
+func NewNinsho[T any](provider *Provider, idp *IdP[T]) (Ninsho[T], error) {
+	var _ninsho Ninsho[T]
 	var err error
 
 	_ninsho.Nonce, err = secureRandom(TOKEN_LEN)
@@ -76,16 +56,17 @@ func NewNinsho(provider *Provider) (Ninsho, error) {
 	}
 
 	_ninsho.Provider = provider
+	_ninsho.IdP = idp
 
 	return _ninsho, nil
 }
 
-func (_ninsho *Ninsho) AuthURL() string {
-	return fmt.Sprintf(AUTH_URL, _ninsho.Provider.ClientID, _ninsho.Provider.RedirectUri, _ninsho.State, _ninsho.Nonce)
+func (_ninsho *Ninsho[T]) GetAuthURL() string {
+	return fmt.Sprintf(_ninsho.IdP.AuthURL, _ninsho.Provider.ClientID, _ninsho.Provider.RedirectUri, _ninsho.State, _ninsho.Nonce)
 }
 
-func (_ninsho *Ninsho) GetUser(code string) (*JWT, error) {
-	var jwt JWT
+func (_ninsho *Ninsho[T]) Auth(code string) (*T, error) {
+	var jwt T
 	var token Token
 
 	provider := _ninsho.Provider
@@ -100,7 +81,7 @@ func (_ninsho *Ninsho) GetUser(code string) (*JWT, error) {
 
 	req, err := http.NewRequest(
 		"POST",
-		TOKEN_URL,
+		_ninsho.IdP.TokenURL,
 		strings.NewReader(values.Encode()),
 	)
 
@@ -135,7 +116,7 @@ func (_ninsho *Ninsho) GetUser(code string) (*JWT, error) {
 
 	req, err = http.NewRequest(
 		"POST",
-		VERIFY_URL,
+		_ninsho.IdP.VerifyURL,
 		strings.NewReader(values.Encode()),
 	)
 
