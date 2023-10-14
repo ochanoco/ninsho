@@ -55,6 +55,8 @@ github.com/modern-go/reflect2 v1.0.2 h1:xBagoLtFs94CBntxluKeaWgTMpvLxC4ur3nMaC9G
 github.com/modern-go/reflect2 v1.0.2/go.mod h1:yWuevngMOJpCy52FWWMvUC8ws7m/LJsjYzDa0/r8luk=
 github.com/ochanoco/ninsho v0.0.0-20231014222241-6103e2611dc4 h1:5kB4nqNjY5ICjstmR4KQ6GueNPuhWE3tfX2bC8gF3UM=
 github.com/ochanoco/ninsho v0.0.0-20231014222241-6103e2611dc4/go.mod h1:vHTb63MeebxFSrHrPZXn0+TQIpdO3bfw8sU7LV8CypM=
+github.com/ochanoco/ninsho/ninsho v0.0.0-20231014232800-1893faded289 h1:/JjuqIluJMAW5q236+OZYGCshWqIScM2/DQSEaaCgpo=
+github.com/ochanoco/ninsho/ninsho v0.0.0-20231014232800-1893faded289/go.mod h1:0AwxRgcG5W4HnwMfZ9cnAWGwP+fPz0qQtXXA1Yz1+GU=
 github.com/pelletier/go-toml/v2 v2.1.0 h1:FnwAJ4oYMvbT/34k9zzHuZNrhlz48GB3/s6at6/MHO4=
 github.com/pelletier/go-toml/v2 v2.1.0/go.mod h1:tJU2Z3ZkXwnxa4DPO899bsyIoywizdUvyaeZurnPPDc=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
