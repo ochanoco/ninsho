@@ -2,7 +2,7 @@ package main
 
 import (
 	"ninsho"
-	gin_ninsho "ninsho/extension/gin"
+	"ninsho/extension/gin_ninsho"
 
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-contrib/sessions/cookie"
