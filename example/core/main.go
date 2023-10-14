@@ -3,24 +3,24 @@ package main
 import (
 	"bufio"
 	"fmt"
-	"line_login"
+	"ninsho"
 	"os"
 	"strings"
 )
 
 func main() {
-	var provider line_login.Provider
+	var provider ninsho.Provider
 
 	provider.ClientID = os.Getenv("CLIENT_ID")
 	provider.ClientSecret = os.Getenv("TOKEN")
 	provider.RedirectUri = "http://127.0.0.1:8080/callback"
 
-	session, err := line_login.NewSession(&provider)
+	n, err := ninsho.NewNinsho(&provider)
 	if err != nil {
 		panic(err)
 	}
 
-	authURL := session.AuthURL()
+	authURL := n.AuthURL()
 
 	fmt.Printf("Open this URL in your browser:\n%v\n\nEnter Code:", authURL)
 
@@ -33,7 +33,7 @@ func main() {
 
 	code = strings.Replace(code, "\n", "", -1)
 
-	jwt, err := session.GetUser(code)
+	jwt, err := n.GetUser(code)
 
 	if err != nil {
 		panic(err)

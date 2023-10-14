@@ -3,8 +3,8 @@ module main
 go 1.19
 
 require (
-	line_login v0.0.0
-	gin_auth v0.0.0
+	ninsho v0.0.0
+	gin_ninsho v0.0.0
 	github.com/gin-contrib/sessions v0.0.5
 	github.com/gin-gonic/gin v1.9.1
 )
@@ -40,6 +40,6 @@ require (
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 
-replace line_login => ../../../
+replace ninsho => ../../../
 
-replace gin_auth => ../../../extension/gin_auth/
+replace gin_ninsho => ../../../extension/gin/

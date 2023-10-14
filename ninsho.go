@@ -1,4 +1,4 @@
-package line_login
+package ninsho
 
 import (
 	"crypto/rand"
@@ -23,7 +23,7 @@ type Provider struct {
 	RedirectUri  string
 }
 
-type Session struct {
+type Ninsho struct {
 	State    string
 	Nonce    string
 	Provider *Provider
@@ -59,36 +59,36 @@ func secureRandom(b int) (string, error) {
 	return fmt.Sprintf("%x", k), nil
 }
 
-func NewSession(provider *Provider) (Session, error) {
-	var session Session
+func NewNinsho(provider *Provider) (Ninsho, error) {
+	var _ninsho Ninsho
 	var err error
 
-	session.Nonce, err = secureRandom(TOKEN_LEN)
+	_ninsho.Nonce, err = secureRandom(TOKEN_LEN)
 
 	if err != nil {
-		return session, err
+		return _ninsho, err
 	}
 
-	session.State, err = secureRandom(TOKEN_LEN)
+	_ninsho.State, err = secureRandom(TOKEN_LEN)
 
 	if err != nil {
-		return session, err
+		return _ninsho, err
 	}
 
-	session.Provider = provider
+	_ninsho.Provider = provider
 
-	return session, nil
+	return _ninsho, nil
 }
 
-func (session *Session) AuthURL() string {
-	return fmt.Sprintf(AUTH_URL, session.Provider.ClientID, session.Provider.RedirectUri, session.State, session.Nonce)
+func (_ninsho *Ninsho) AuthURL() string {
+	return fmt.Sprintf(AUTH_URL, _ninsho.Provider.ClientID, _ninsho.Provider.RedirectUri, _ninsho.State, _ninsho.Nonce)
 }
 
-func (session *Session) GetUser(code string) (*JWT, error) {
+func (_ninsho *Ninsho) GetUser(code string) (*JWT, error) {
 	var jwt JWT
 	var token Token
 
-	provider := session.Provider
+	provider := _ninsho.Provider
 
 	values := url.Values{}
 

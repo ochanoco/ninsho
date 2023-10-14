@@ -1,4 +1,4 @@
-module github.com/ochanoco/line-login/extension/gin-auth
+module github.com/ochanoco/line-login/extension/gin-ninsho
 
 go 1.19
 
@@ -33,10 +33,10 @@ require (
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 
-replace line_login => ../../
+replace ninsho => ../../
 
 require (
 	github.com/gin-contrib/sessions v0.0.5
 	github.com/gin-gonic/gin v1.9.1
-	line_login v0.0.0
+	ninsho v0.0.0
 )

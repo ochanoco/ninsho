@@ -1,3 +1,3 @@
-module github.com/ochanoco/line_login
+module github.com/ochanoco/ninsho
 
 go 1.19
