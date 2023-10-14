@@ -1,4 +1,4 @@
-module github.com/ochanoco/line-login/extension/gin-ninsho
+module github.com/ochanoco/ninsho/extension/gin-ninsho
 
 go 1.19
 
@@ -21,6 +21,7 @@ require (
 	github.com/mattn/go-isatty v0.0.19 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.2 // indirect
+	github.com/ochanoco/ninsho v0.0.0-20231014222241-6103e2611dc4 // indirect
 	github.com/pelletier/go-toml/v2 v2.1.0 // indirect
 	github.com/twitchyliquid64/golang-asm v0.15.1 // indirect
 	github.com/ugorji/go/codec v1.2.11 // indirect
@@ -33,10 +34,10 @@ require (
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 
-replace ninsho => ../../
+// replace ninsho => ../../
+// require ninsho v0.0.0
 
 require (
 	github.com/gin-contrib/sessions v0.0.5
 	github.com/gin-gonic/gin v1.9.1
-	ninsho v0.0.0
 )
