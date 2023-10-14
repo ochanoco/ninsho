@@ -6,7 +6,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/ochanoco/ninsho"
+	"github.com/ochanoco/ninsho/ninsho"
 )
 
 func main() {
