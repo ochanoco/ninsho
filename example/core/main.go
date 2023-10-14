@@ -3,19 +3,19 @@ package main
 import (
 	"bufio"
 	"fmt"
-	"line_login_core"
+	"line_login"
 	"os"
 	"strings"
 )
 
 func main() {
-	var provider line_login_core.Provider
+	var provider line_login.Provider
 
 	provider.ClientID = os.Getenv("CLIENT_ID")
 	provider.ClientSecret = os.Getenv("TOKEN")
 	provider.RedirectUri = "http://127.0.0.1:8080/callback"
 
-	session, err := line_login_core.NewSession(&provider)
+	session, err := line_login.NewSession(&provider)
 	if err != nil {
 		panic(err)
 	}
