@@ -1,4 +1,4 @@
-module github.com/ochanoco/ninsho/extension/gin-ninsho
+module github.com/ochanoco/ninsho/extension/gin
 
 go 1.19
 

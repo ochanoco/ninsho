@@ -1,4 +1,4 @@
-package gin_ninsho
+package gin
 
 import (
 	"encoding/json"
