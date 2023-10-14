@@ -43,9 +43,9 @@ func NewNinshoGin(r *gin.RouterGroup, provider *ninsho.Provider, domain, unautho
 func NewNinshoGinFromEnv(r *gin.RouterGroup, unauthorized, callback, afterAuth string) (*NinshoGin, error) {
 	var provider ninsho.Provider
 
-	domain := os.Getenv("LINE_LOGIN_BASE")
-	provider.ClientID = os.Getenv("LINE_LOGIN_CLIENT_ID")
-	provider.ClientSecret = os.Getenv("LINE_LOGIN_CLIENT_SECRET")
+	domain := os.Getenv("NINSHO_BASE")
+	provider.ClientID = os.Getenv("NINSHO_CLIENT_ID")
+	provider.ClientSecret = os.Getenv("NINSHO_CLIENT_SECRET")
 	provider.RedirectUri = domain + callback
 
 	return NewNinshoGin(r, &provider, domain, unauthorized, callback, afterAuth)
