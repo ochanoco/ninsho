@@ -3,9 +3,10 @@ package main
 import (
 	"bufio"
 	"fmt"
-	"ninsho"
 	"os"
 	"strings"
+
+	"github.com/ochanoco/ninsho"
 )
 
 func main() {
