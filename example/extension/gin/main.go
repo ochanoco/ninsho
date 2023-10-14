@@ -1,8 +1,9 @@
 package main
 
 import (
+	"gin_ninsho"
+
 	"ninsho"
-	gin_ninsho "ninsho/extension/gin"
 
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-contrib/sessions/cookie"

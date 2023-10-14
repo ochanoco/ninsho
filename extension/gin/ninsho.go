@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"os"
 
-	"ninsho"
+	"github.com/ochanoco/ninsho"
 
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
