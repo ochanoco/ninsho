@@ -10,28 +10,29 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type NinshoGin[T any] struct {
-	UnauthorizedPath string
-	CallbackPath     string
-	AfterAuthPath    string
-	Domain           string
-	Ninsho           *ninsho.Ninsho[T]
+type NinshoGinPath struct {
+	Unauthorized string
+	Callback     string
+	AfterAuth    string
 }
 
-func NewNinshoGin[T any](r *gin.RouterGroup, provider *ninsho.Provider, idp *ninsho.IdP[T], domain, unauthorized, callback, afterAuth string) (*NinshoGin[T], error) {
-	session, err := ninsho.NewNinsho[T](provider, idp)
+type NinshoGin[T any] struct {
+	Path   *NinshoGinPath
+	Domain string
+	Ninsho *ninsho.Ninsho[T]
+}
+
+func NewNinshoGin[T any](r *gin.RouterGroup, provider *ninsho.Provider, idp *ninsho.IdP[T], domain string, path *NinshoGinPath) (*NinshoGin[T], error) {
+	n, err := ninsho.NewNinsho[T](provider, idp)
 	if err != nil {
 		return nil, err
 	}
 
 	ninshoGin := NinshoGin[T]{
-		UnauthorizedPath: unauthorized,
-		CallbackPath:     callback,
-		AfterAuthPath:    afterAuth,
-		Domain:           domain,
+		Domain: domain,
+		Path:   path,
+		Ninsho: &n,
 	}
-
-	ninshoGin.Ninsho = &session
 
 	ninshoGin.Callback(r)
 
@@ -39,7 +40,12 @@ func NewNinshoGin[T any](r *gin.RouterGroup, provider *ninsho.Provider, idp *nin
 }
 
 func DefaultNinshoGin[T any](r *gin.RouterGroup, provider *ninsho.Provider, idp *ninsho.IdP[T], domain string) (*NinshoGin[T], error) {
-	return NewNinshoGin[T](r, provider, idp, domain, "/unauthorized", "/callback", "/")
+	path := NinshoGinPath{
+		Unauthorized: "/unauthorized",
+		Callback:     "/callback",
+		AfterAuth:    "/",
+	}
+	return NewNinshoGin[T](r, provider, idp, domain, &path)
 }
 
 func (ninsho *NinshoGin[T]) AuthMiddleware() gin.HandlerFunc {
@@ -47,7 +53,7 @@ func (ninsho *NinshoGin[T]) AuthMiddleware() gin.HandlerFunc {
 		session := sessions.Default(c)
 
 		if session.Get("user") == nil {
-			c.Redirect(http.StatusTemporaryRedirect, ninsho.UnauthorizedPath)
+			c.Redirect(http.StatusTemporaryRedirect, ninsho.Path.Unauthorized)
 			c.Abort()
 		}
 
@@ -69,7 +75,7 @@ func (ninsho *NinshoGin[T]) Logout(c *gin.Context) {
 }
 
 func (ninsho *NinshoGin[T]) Callback(r *gin.RouterGroup) {
-	r.GET(ninsho.CallbackPath, func(c *gin.Context) {
+	r.GET(ninsho.Path.Callback, func(c *gin.Context) {
 		code := c.Query("code")
 
 		jwt, err := ninsho.Ninsho.Auth(code)
@@ -87,6 +93,6 @@ func (ninsho *NinshoGin[T]) Callback(r *gin.RouterGroup) {
 		session.Set("user", user)
 		session.Save()
 
-		c.Redirect(http.StatusTemporaryRedirect, ninsho.AfterAuthPath)
+		c.Redirect(http.StatusTemporaryRedirect, ninsho.Path.AfterAuth)
 	})
 }
