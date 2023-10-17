@@ -45,6 +45,9 @@ func DefaultNinshoGin[T any](r *gin.RouterGroup, provider *ninsho.Provider, idp 
 		Callback:     "/callback",
 		AfterAuth:    "/",
 	}
+
+	provider.RedirectUri = domain + path.Callback
+
 	return NewNinshoGin[T](r, provider, idp, domain, &path)
 }
 
@@ -90,7 +93,7 @@ func (ninsho *NinshoGin[T]) Callback(r *gin.RouterGroup) {
 
 		session := sessions.Default(c)
 
-		session.Set("user", user)
+		session.Set("user", string(user))
 		session.Save()
 
 		c.Redirect(http.StatusTemporaryRedirect, ninsho.Path.AfterAuth)
