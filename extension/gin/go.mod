@@ -39,5 +39,5 @@ require (
 require (
 	github.com/gin-contrib/sessions v0.0.5
 	github.com/gin-gonic/gin v1.9.1
-	github.com/ochanoco/ninsho v0.0.0-20231014235251-72dfe32932ea
+	github.com/ochanoco/ninsho v0.0.0-20231017122806-08db15305c83
 )
