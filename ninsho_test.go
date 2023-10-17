@@ -4,14 +4,14 @@ import (
 	"testing"
 )
 
-func sampleNinsho() Ninsho {
+func sampleNinsho() Ninsho[LINE_JWT] {
 	var provider Provider
 
 	provider.ClientID = "12345"
 	provider.ClientSecret = ""
 	provider.RedirectUri = "http://127.0.0.1:8080/callback"
 
-	ninsho, err := NewNinsho(&provider)
+	ninsho, err := NewNinsho(&provider, &LINE_LOGIN)
 	if err != nil {
 		panic(err)
 	}
