@@ -4,7 +4,7 @@ import (
 	"testing"
 )
 
-func sampleNinsho() Ninsho[LINE_JWT] {
+func sampleNinsho() Ninsho[LINE_USER] {
 	var provider Provider
 
 	provider.ClientID = "12345"

@@ -1,10 +1,9 @@
 package main
 
 import (
-	gin_ninsho "gin_ninsho"
 	"os"
 
-	// "ninsho"
+	"gin_ninsho"
 
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-contrib/sessions/cookie"
@@ -27,7 +26,7 @@ func main() {
 		ClientSecret: CLIENT_SECRET,
 	}
 
-	_ninsho, err := gin_ninsho.DefaultNinshoGin(&r.RouterGroup, &provider, &ninsho.LINE_LOGIN, DOMAIN)
+	_ninsho, err := gin_ninsho.DefaultNinshoGin(&r.RouterGroup, provider, ninsho.LINE_LOGIN, DOMAIN, CLIENT_ID, CLIENT_SECRET)
 	if err != nil {
 		panic(err)
 	}
