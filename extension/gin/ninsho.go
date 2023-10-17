@@ -3,7 +3,6 @@ package gin
 import (
 	"encoding/json"
 	"net/http"
-	"os"
 
 	"github.com/ochanoco/ninsho"
 
@@ -39,19 +38,8 @@ func NewNinshoGin[T any](r *gin.RouterGroup, provider *ninsho.Provider, idp *nin
 	return &ninshoGin, nil
 }
 
-func NewNinshoGinFromEnv[T any](r *gin.RouterGroup, idp *ninsho.IdP[T], unauthorized, callback, afterAuth string) (*NinshoGin[T], error) {
-	var provider ninsho.Provider
-
-	domain := os.Getenv("NINSHO_BASE")
-	provider.ClientID = os.Getenv("NINSHO_CLIENT_ID")
-	provider.ClientSecret = os.Getenv("NINSHO_CLIENT_SECRET")
-	provider.RedirectUri = domain + callback
-
-	return NewNinshoGin[T](r, &provider, idp, domain, unauthorized, callback, afterAuth)
-}
-
-func DefaultNinshoGin[T any](r *gin.RouterGroup, idp *ninsho.IdP[T]) (*NinshoGin[T], error) {
-	return NewNinshoGinFromEnv[T](r, idp, "/unauthorized", "/callback", "/")
+func DefaultNinshoGin[T any](r *gin.RouterGroup, provider *ninsho.Provider, idp *ninsho.IdP[T], domain string) (*NinshoGin[T], error) {
+	return NewNinshoGin[T](r, provider, idp, domain, "/unauthorized", "/callback", "/")
 }
 
 func (ninsho *NinshoGin[T]) AuthMiddleware() gin.HandlerFunc {
