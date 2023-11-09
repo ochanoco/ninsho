@@ -71,12 +71,15 @@ func InitPKCEAuth(usePKCE bool) (*PKCEAuth, error) {
 	}
 }
 
-type Ninsho[T any] struct {
+type Session struct {
 	State    string
-	Nonce    string
+	PkceAuth *PKCEAuth
+}
+
+type Ninsho[T any] struct {
 	Provider *Provider
 	IdP      *IdP[T]
-	PkceAuth *PKCEAuth
+	Session  *Session
 }
 
 type Token struct {
@@ -88,57 +91,79 @@ type Token struct {
 	TokenType    string `json:"token_type"`
 }
 
-func NewNinsho[T any](provider *Provider, idp *IdP[T]) (Ninsho[T], error) {
-	var _ninsho Ninsho[T]
+func RandomSession(usePKCE bool) (*Session, error) {
+	var session Session
 	var err error
 
-	_ninsho.Nonce, err = secureRandom(TOKEN_LEN)
+	session.State, err = secureRandom(TOKEN_LEN)
 
 	if err != nil {
-		return _ninsho, err
+		return nil, err
 	}
 
-	_ninsho.State, err = secureRandom(TOKEN_LEN)
-
+	session.PkceAuth, err = InitPKCEAuth(usePKCE)
 	if err != nil {
-		return _ninsho, err
+		return nil, err
 	}
 
-	pkceAuth, err := InitPKCEAuth(provider.UsePKCE)
-	if err != nil {
-		return _ninsho, err
-	}
+	return &session, nil
+}
+
+func NewNinsho[T User](provider *Provider, idp *IdP[T], session *Session) *Ninsho[T] {
+	var _ninsho Ninsho[T]
 
 	_ninsho.Provider = provider
 	_ninsho.IdP = idp
-	_ninsho.PkceAuth = pkceAuth
+	_ninsho.Session = session
+
+	return &_ninsho
+}
+
+func InitNinsho[T User](provider *Provider, idp *IdP[T]) (*Ninsho[T], error) {
+	session, err := RandomSession(provider.UsePKCE)
+
+	if err != nil {
+		return nil, err
+	}
+
+	_ninsho := NewNinsho[T](provider, idp, session)
 
 	return _ninsho, nil
 }
 
-func (_ninsho *Ninsho[T]) GetAuthURL() string {
+func (_ninsho *Ninsho[T]) MakeAuthURL() (string, string, error) {
+	nonce, err := secureRandom(TOKEN_LEN)
+
+	if err != nil {
+		return "", "", err
+	}
+
 	values := url.Values{}
 	values.Add("response_type", "code")
 	values.Add("client_id", _ninsho.Provider.ClientID)
 	values.Add("redirect_uri", _ninsho.Provider.RedirectUri)
-	values.Add("nonce", _ninsho.Nonce)
-	values.Add("state", _ninsho.State)
+	values.Add("nonce", nonce)
+	values.Add("state", _ninsho.Session.State)
 	values.Add("scope", _ninsho.Provider.Scope)
 
 	if _ninsho.Provider.UsePKCE {
-		values.Add("code_challenge", _ninsho.PkceAuth.CodeChallenge)
-		values.Add("code_challenge_method", _ninsho.PkceAuth.CodeChallengeMethod)
+		values.Add("code_challenge", _ninsho.Session.PkceAuth.CodeChallenge)
+		values.Add("code_challenge_method", _ninsho.Session.PkceAuth.CodeChallengeMethod)
 	}
 
 	url := _ninsho.IdP.AuthURL + "?" + values.Encode()
-	return url
+	return url, nonce, nil
 }
 
-func (_ninsho *Ninsho[T]) Auth(code string) (*T, error) {
+func (_ninsho *Ninsho[T]) Auth(code string, state string) (*T, error) {
 	var jwt T
 	var token Token
 
 	provider := _ninsho.Provider
+
+	if state != _ninsho.Session.State {
+		return nil, fmt.Errorf("state is wrong: %v", state)
+	}
 
 	values := url.Values{}
 	values.Add("grant_type", "authorization_code")
@@ -148,7 +173,7 @@ func (_ninsho *Ninsho[T]) Auth(code string) (*T, error) {
 	values.Add("redirect_uri", provider.RedirectUri)
 
 	if _ninsho.Provider.UsePKCE {
-		values.Add("code_verifier", _ninsho.PkceAuth.CodeVerifier)
+		values.Add("code_verifier", _ninsho.Session.PkceAuth.CodeVerifier)
 	}
 
 	req, err := http.NewRequest(

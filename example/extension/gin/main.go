@@ -1,10 +1,10 @@
 package main
 
 import (
-	// gin_ninsho "gin_ninsho"
 	"os"
 
 	// "ninsho"
+	// gin_ninsho "gin_ninsho"
 
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-contrib/sessions/cookie"

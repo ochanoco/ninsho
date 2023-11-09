@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/ochanoco/ninsho"
+
 	// "ninsho"
 
 	"github.com/gin-contrib/sessions"
@@ -17,21 +18,18 @@ type NinshoGinPath struct {
 }
 
 type NinshoGin[T any] struct {
-	Path   *NinshoGinPath
-	Domain string
-	Ninsho *ninsho.Ninsho[T]
+	Path     *NinshoGinPath
+	Domain   string
+	Provider *ninsho.Provider
+	IdP      *ninsho.IdP[T]
 }
 
 func NewNinshoGin[T any](r *gin.RouterGroup, provider *ninsho.Provider, idp *ninsho.IdP[T], domain string, path *NinshoGinPath) (*NinshoGin[T], error) {
-	n, err := ninsho.NewNinsho[T](provider, idp)
-	if err != nil {
-		return nil, err
-	}
-
 	ninshoGin := NinshoGin[T]{
-		Domain: domain,
-		Path:   path,
-		Ninsho: &n,
+		Domain:   domain,
+		Path:     path,
+		Provider: provider,
+		IdP:      idp,
 	}
 
 	ninshoGin.Callback(r)
@@ -53,20 +51,30 @@ func DefaultNinshoGin[T any](r *gin.RouterGroup, provider *ninsho.Provider, idp 
 
 func (_ninsho *NinshoGin[T]) AuthMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
-
 		user, err := LoadUser[ninsho.LINE_USER](c)
 
 		if user == nil || err != nil {
 			c.Redirect(http.StatusTemporaryRedirect, _ninsho.Path.Unauthorized)
 			c.AbortWithStatus(401)
+			return
 		}
 
 		c.Next()
 	}
 }
 
-func (ninsho *NinshoGin[T]) Login(c *gin.Context) {
-	url := ninsho.Ninsho.GetAuthURL()
+func (_ninsho *NinshoGin[T]) Login(c *gin.Context) {
+	n, err := ninsho.InitNinsho[T](_ninsho.Provider, _ninsho.IdP)
+	if err != nil {
+		panic(err)
+	}
+
+	url, _, err := n.MakeAuthURL()
+	if err != nil {
+		panic(err)
+	}
+
+	SaveLoginingSession(*n.Session, c)
 
 	c.Redirect(http.StatusTemporaryRedirect, url)
 	c.Abort()
@@ -78,13 +86,23 @@ func (ninsho *NinshoGin[T]) Logout(c *gin.Context) {
 	session.Save()
 }
 
-func (ninsho *NinshoGin[T]) Callback(r *gin.RouterGroup) {
-	r.GET(ninsho.Path.Callback, func(c *gin.Context) {
+func (_ninsho *NinshoGin[T]) Callback(r *gin.RouterGroup) {
+	r.GET(_ninsho.Path.Callback, func(c *gin.Context) {
 		code := c.Query("code")
+		state := c.Query("state")
 
-		jwt, err := ninsho.Ninsho.Auth(code)
+		stateSession, err := LoadLoginingSession(c)
 		if err != nil {
 			panic(err)
+		}
+
+		n := ninsho.NewNinsho[T](_ninsho.Provider, _ninsho.IdP, stateSession)
+
+		jwt, err := n.Auth(code, state)
+		if err != nil {
+			c.Redirect(http.StatusTemporaryRedirect, _ninsho.Path.Unauthorized)
+			c.AbortWithStatus(401)
+			return
 		}
 
 		err = SaveUser(jwt, c)
@@ -93,6 +111,6 @@ func (ninsho *NinshoGin[T]) Callback(r *gin.RouterGroup) {
 			panic(err)
 		}
 
-		c.Redirect(http.StatusTemporaryRedirect, ninsho.Path.AfterAuth)
+		c.Redirect(http.StatusTemporaryRedirect, _ninsho.Path.AfterAuth)
 	})
 }
