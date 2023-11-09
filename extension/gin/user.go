@@ -6,13 +6,13 @@ import (
 
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
+	"github.com/ochanoco/ninsho"
 )
 
-func GetUser[T any](c *gin.Context) (*T, error) {
+func LoadUser[T ninsho.User](c *gin.Context) (*T, error) {
 	var jwt T
 
 	sess := sessions.Default(c)
-
 	user := sess.Get("user")
 	if user == nil {
 		return nil, nil
@@ -26,4 +26,21 @@ func GetUser[T any](c *gin.Context) (*T, error) {
 	}
 
 	return &jwt, nil
+}
+
+func SaveUser(user ninsho.User, c *gin.Context) error {
+	userBytes, err := json.Marshal(user)
+
+	if err != nil {
+		return err
+	}
+
+	userStr := string(userBytes)
+
+	session := sessions.Default(c)
+
+	session.Set("user", userStr)
+	session.Save()
+
+	return nil
 }
