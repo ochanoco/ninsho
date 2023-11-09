@@ -4,6 +4,7 @@ import (
 	"crypto/sha256"
 	"encoding/base64"
 	"encoding/json"
+	"fmt"
 	"io"
 	"net/http"
 	"net/url"
@@ -170,6 +171,10 @@ func (_ninsho *Ninsho[T]) Auth(code string) (*T, error) {
 
 	defer resp.Body.Close()
 
+	if resp.StatusCode != 200 {
+		return nil, fmt.Errorf("failed to authentiction #1: (%v)", resp.StatusCode)
+	}
+
 	b, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, err
@@ -205,6 +210,10 @@ func (_ninsho *Ninsho[T]) Auth(code string) (*T, error) {
 	}
 
 	defer resp.Body.Close()
+
+	if resp.StatusCode != 200 {
+		return nil, fmt.Errorf("failed to authentiction #1: (%v)", resp.StatusCode)
+	}
 
 	b, err = io.ReadAll(resp.Body)
 	if err != nil {
