@@ -1,18 +1,16 @@
 package main
 
 import (
-	gin_ninsho "gin_ninsho"
+	// gin_ninsho "gin_ninsho"
 	"os"
-
-	"github.com/ochanoco/ninsho"
 
 	// "ninsho"
 
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-contrib/sessions/cookie"
 	"github.com/gin-gonic/gin"
-	// "github.com/ochanoco/ninsho"
-	// "github.com/ochanoco/ninsho/extension/gin"
+	"github.com/ochanoco/ninsho"
+	gin_ninsho "github.com/ochanoco/ninsho/extension/gin"
 )
 
 var DOMAIN = os.Getenv("NINSHO_BASE")
