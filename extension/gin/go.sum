@@ -63,6 +63,8 @@ github.com/ochanoco/ninsho v0.0.0-20231109151116-dad57567519a h1:X68vZrpXjB8gmkr
 github.com/ochanoco/ninsho v0.0.0-20231109151116-dad57567519a/go.mod h1:vHTb63MeebxFSrHrPZXn0+TQIpdO3bfw8sU7LV8CypM=
 github.com/ochanoco/ninsho v0.0.0-20231109151444-d5b163c09984 h1:PjOldFoe5HsQZdvpzdpRw1/OKmZqI+PMTcMxtZq+1fc=
 github.com/ochanoco/ninsho v0.0.0-20231109151444-d5b163c09984/go.mod h1:vHTb63MeebxFSrHrPZXn0+TQIpdO3bfw8sU7LV8CypM=
+github.com/ochanoco/ninsho v0.0.0-20231109160856-d8d155b392dd h1:oKHUL1XynG2ryhzneeMuRzCCdqYCIPLDVsL60+gBYx4=
+github.com/ochanoco/ninsho v0.0.0-20231109160856-d8d155b392dd/go.mod h1:vHTb63MeebxFSrHrPZXn0+TQIpdO3bfw8sU7LV8CypM=
 github.com/pelletier/go-toml/v2 v2.1.0 h1:FnwAJ4oYMvbT/34k9zzHuZNrhlz48GB3/s6at6/MHO4=
 github.com/pelletier/go-toml/v2 v2.1.0/go.mod h1:tJU2Z3ZkXwnxa4DPO899bsyIoywizdUvyaeZurnPPDc=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
