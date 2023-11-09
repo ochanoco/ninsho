@@ -2,7 +2,7 @@
 
 All-inclusive compornent of sso authentication.
 
-Note that this is only for [ochano.co proxy](https://github.com/ochanoco/proxy), so it does not support other use cases.
+Note that this is only for [torima](https://github.com/ochanoco/torima), so it does not support other use cases.
 
 [![Go](https://github.com/ochanoco/ninsho/actions/workflows/go.yml/badge.svg?branch=develop)](https://github.com/ochanoco/ninsho/actions/workflows/go.yml)
 
@@ -34,5 +34,5 @@ export NINSHO_CLIENT_ID="xxxx"
 export NINSHO_CLIENT_SECRET="xxxx"
 
 # "xxxx/callback"
-export  NINSHO_REDIRECT_URI="xxxx"
+export NINSHO_BASE_URI="xxxx"
 ```
