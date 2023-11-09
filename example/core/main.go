@@ -12,9 +12,11 @@ import (
 func main() {
 	var provider ninsho.Provider
 
-	provider.ClientID = os.Getenv("CLIENT_ID")
-	provider.ClientSecret = os.Getenv("TOKEN")
+	provider.ClientID = os.Getenv("NINSHO_CLIENT_ID")
+	provider.ClientSecret = os.Getenv("NINSHO_CLIENT_SECRET")
 	provider.RedirectUri = "http://127.0.0.1:8080/callback"
+	provider.Scope = "profile openid"
+	provider.UsePKCE = true
 
 	n, err := ninsho.NewNinsho(&provider, &ninsho.LINE_LOGIN)
 	if err != nil {

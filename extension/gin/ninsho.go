@@ -1,7 +1,6 @@
 package gin
 
 import (
-	"encoding/json"
 	"net/http"
 
 	"github.com/ochanoco/ninsho"
@@ -51,13 +50,14 @@ func DefaultNinshoGin[T any](r *gin.RouterGroup, provider *ninsho.Provider, idp 
 	return NewNinshoGin[T](r, provider, idp, domain, &path)
 }
 
-func (ninsho *NinshoGin[T]) AuthMiddleware() gin.HandlerFunc {
+func (_ninsho *NinshoGin[T]) AuthMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		session := sessions.Default(c)
 
-		if session.Get("user") == nil {
-			c.Redirect(http.StatusTemporaryRedirect, ninsho.Path.Unauthorized)
-			c.Abort()
+		user, err := LoadUser[ninsho.LINE_USER](c)
+
+		if user == nil || err != nil {
+			c.Redirect(http.StatusTemporaryRedirect, _ninsho.Path.Unauthorized)
+			c.AbortWithStatus(401)
 		}
 
 		c.Next()
@@ -86,15 +86,11 @@ func (ninsho *NinshoGin[T]) Callback(r *gin.RouterGroup) {
 			panic(err)
 		}
 
-		user, err := json.Marshal(jwt)
+		err = SaveUser(jwt, c)
+
 		if err != nil {
 			panic(err)
 		}
-
-		session := sessions.Default(c)
-
-		session.Set("user", string(user))
-		session.Save()
 
 		c.Redirect(http.StatusTemporaryRedirect, ninsho.Path.AfterAuth)
 	})

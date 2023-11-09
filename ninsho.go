@@ -1,17 +1,22 @@
 package ninsho
 
 import (
+	"crypto/sha256"
+	"encoding/base64"
 	"encoding/json"
-	"fmt"
 	"io"
 	"net/http"
 	"net/url"
 	"strings"
 )
 
-var TOKEN_LEN = 32
+var DEFAULT_PKCE_METHOD = "S256"
 
-type IdP[T any] struct {
+var TOKEN_LEN = 64
+
+type User interface{}
+
+type IdP[T User] struct {
 	AuthURL   string
 	TokenURL  string
 	VerifyURL string
@@ -21,6 +26,48 @@ type Provider struct {
 	ClientID     string
 	ClientSecret string
 	RedirectUri  string
+	Scope        string
+	UsePKCE      bool
+}
+
+type PKCEAuth struct {
+	CodeChallenge       string
+	CodeVerifier        string
+	CodeChallengeMethod string
+}
+
+func NewPKCEAuth() *PKCEAuth {
+	var pkce PKCEAuth
+	return &pkce
+}
+
+func RandomPKCE() (*PKCEAuth, error) {
+	pkce := NewPKCEAuth()
+
+	codeVerifier, err := secureRandom(TOKEN_LEN)
+	if err != nil {
+		return nil, err
+	}
+
+	h := sha256.New()
+	h.Write([]byte(codeVerifier))
+	s := h.Sum(nil)
+
+	codeChallenge := base64.RawURLEncoding.EncodeToString(s)
+
+	pkce.CodeVerifier = codeVerifier
+	pkce.CodeChallenge = codeChallenge
+	pkce.CodeChallengeMethod = DEFAULT_PKCE_METHOD
+
+	return pkce, nil
+}
+
+func InitPKCEAuth(usePKCE bool) (*PKCEAuth, error) {
+	if usePKCE {
+		return RandomPKCE()
+	} else {
+		return NewPKCEAuth(), nil
+	}
 }
 
 type Ninsho[T any] struct {
@@ -28,6 +75,7 @@ type Ninsho[T any] struct {
 	Nonce    string
 	Provider *Provider
 	IdP      *IdP[T]
+	PkceAuth *PKCEAuth
 }
 
 type Token struct {
@@ -55,14 +103,34 @@ func NewNinsho[T any](provider *Provider, idp *IdP[T]) (Ninsho[T], error) {
 		return _ninsho, err
 	}
 
+	pkceAuth, err := InitPKCEAuth(provider.UsePKCE)
+	if err != nil {
+		return _ninsho, err
+	}
+
 	_ninsho.Provider = provider
 	_ninsho.IdP = idp
+	_ninsho.PkceAuth = pkceAuth
 
 	return _ninsho, nil
 }
 
 func (_ninsho *Ninsho[T]) GetAuthURL() string {
-	return fmt.Sprintf(_ninsho.IdP.AuthURL, _ninsho.Provider.ClientID, _ninsho.Provider.RedirectUri, _ninsho.State, _ninsho.Nonce)
+	values := url.Values{}
+	values.Add("response_type", "code")
+	values.Add("client_id", _ninsho.Provider.ClientID)
+	values.Add("redirect_uri", _ninsho.Provider.RedirectUri)
+	values.Add("nonce", _ninsho.Nonce)
+	values.Add("state", _ninsho.State)
+	values.Add("scope", _ninsho.Provider.Scope)
+
+	if _ninsho.Provider.UsePKCE {
+		values.Add("code_challenge", _ninsho.PkceAuth.CodeChallenge)
+		values.Add("code_challenge_method", _ninsho.PkceAuth.CodeChallengeMethod)
+	}
+
+	url := _ninsho.IdP.AuthURL + "?" + values.Encode()
+	return url
 }
 
 func (_ninsho *Ninsho[T]) Auth(code string) (*T, error) {
@@ -72,12 +140,15 @@ func (_ninsho *Ninsho[T]) Auth(code string) (*T, error) {
 	provider := _ninsho.Provider
 
 	values := url.Values{}
-
 	values.Add("grant_type", "authorization_code")
 	values.Add("code", code)
 	values.Add("client_id", provider.ClientID)
 	values.Add("client_secret", provider.ClientSecret)
 	values.Add("redirect_uri", provider.RedirectUri)
+
+	if _ninsho.Provider.UsePKCE {
+		values.Add("code_verifier", _ninsho.PkceAuth.CodeVerifier)
+	}
 
 	req, err := http.NewRequest(
 		"POST",
@@ -96,6 +167,7 @@ func (_ninsho *Ninsho[T]) Auth(code string) (*T, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	defer resp.Body.Close()
 
 	b, err := io.ReadAll(resp.Body)
@@ -131,6 +203,7 @@ func (_ninsho *Ninsho[T]) Auth(code string) (*T, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	defer resp.Body.Close()
 
 	b, err = io.ReadAll(resp.Body)
@@ -141,7 +214,7 @@ func (_ninsho *Ninsho[T]) Auth(code string) (*T, error) {
 	err = json.Unmarshal(b, &jwt)
 
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 
 	return &jwt, nil

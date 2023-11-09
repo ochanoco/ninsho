@@ -4,12 +4,15 @@ import (
 	gin_ninsho "gin_ninsho"
 	"os"
 
+	"github.com/ochanoco/ninsho"
+
 	// "ninsho"
 
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-contrib/sessions/cookie"
 	"github.com/gin-gonic/gin"
-	"github.com/ochanoco/ninsho"
+	// "github.com/ochanoco/ninsho"
+	// "github.com/ochanoco/ninsho/extension/gin"
 )
 
 var DOMAIN = os.Getenv("NINSHO_BASE")
@@ -25,6 +28,8 @@ func main() {
 	provider := ninsho.Provider{
 		ClientID:     CLIENT_ID,
 		ClientSecret: CLIENT_SECRET,
+		Scope:        "profile openid",
+		UsePKCE:      true,
 	}
 
 	_ninsho, err := gin_ninsho.DefaultNinshoGin(&r.RouterGroup, &provider, &ninsho.LINE_LOGIN, DOMAIN)
@@ -33,7 +38,7 @@ func main() {
 	}
 
 	r.GET("/", _ninsho.AuthMiddleware(), func(c *gin.Context) {
-		jwt, err := gin_ninsho.GetUser[ninsho.LINE_USER](c)
+		jwt, err := gin_ninsho.LoadUser[ninsho.LINE_USER](c)
 		if err != nil {
 			panic(err)
 		}
