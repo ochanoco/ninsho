@@ -6,3 +6,5 @@ github.com/ochanoco/ninsho v0.0.0-20231109151444-d5b163c09984 h1:PjOldFoe5HsQZdv
 github.com/ochanoco/ninsho v0.0.0-20231109151444-d5b163c09984/go.mod h1:vHTb63MeebxFSrHrPZXn0+TQIpdO3bfw8sU7LV8CypM=
 github.com/ochanoco/ninsho v0.0.0-20231109160856-d8d155b392dd h1:oKHUL1XynG2ryhzneeMuRzCCdqYCIPLDVsL60+gBYx4=
 github.com/ochanoco/ninsho v0.0.0-20231109160856-d8d155b392dd/go.mod h1:vHTb63MeebxFSrHrPZXn0+TQIpdO3bfw8sU7LV8CypM=
+github.com/ochanoco/ninsho v0.0.0-20231109183450-a284b9f5aa66 h1:G3ykPuW/J06H48f+WmMHREbMMJQzo5JsB7N9AwrLdzs=
+github.com/ochanoco/ninsho v0.0.0-20231109183450-a284b9f5aa66/go.mod h1:vHTb63MeebxFSrHrPZXn0+TQIpdO3bfw8sU7LV8CypM=
