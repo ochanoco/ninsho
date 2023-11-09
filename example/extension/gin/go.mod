@@ -6,7 +6,7 @@ require (
 	gin_ninsho v0.0.0
 	github.com/gin-contrib/sessions v0.0.5
 	github.com/gin-gonic/gin v1.9.1
-	github.com/ochanoco/ninsho v0.0.0-20231109151116-dad57567519a
+	github.com/ochanoco/ninsho v0.0.0-20231109151444-d5b163c09984
 )
 
 require (
