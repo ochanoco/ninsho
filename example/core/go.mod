@@ -7,5 +7,5 @@ go 1.18
 
 require (
 	github.com/mattn/go-sqlite3 v1.14.18 // indirect
-	github.com/ochanoco/ninsho v0.0.0-20231109183450-a284b9f5aa66 // indirect
+	github.com/ochanoco/ninsho v0.0.0-20231109184645-04752e670e61 // indirect
 )

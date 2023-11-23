@@ -6,7 +6,7 @@ require (
 	gin_ninsho v0.0.0
 	github.com/gin-contrib/sessions v0.0.5
 	github.com/gin-gonic/gin v1.9.1
-	github.com/ochanoco/ninsho v0.0.0-20231109183450-a284b9f5aa66
+	github.com/ochanoco/ninsho v0.0.0-20231109184645-04752e670e61
 )
 
 require (
@@ -28,7 +28,7 @@ require (
 	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.2 // indirect
-	github.com/ochanoco/ninsho/extension/gin v0.0.0-20231109183316-555c40cb7598 // indirect
+	github.com/ochanoco/ninsho/extension/gin v0.0.0-20231123132822-de0a8493b499 // indirect
 	github.com/pelletier/go-toml/v2 v2.1.0 // indirect
 	github.com/twitchyliquid64/golang-asm v0.15.1 // indirect
 	github.com/ugorji/go/codec v1.2.11 // indirect
