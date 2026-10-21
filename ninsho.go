@@ -73,6 +73,7 @@ func InitPKCEAuth(usePKCE bool) (*PKCEAuth, error) {
 
 type Session struct {
 	State    string
+	Nonce    string
 	PkceAuth *PKCEAuth
 }
 
@@ -138,6 +139,8 @@ func (_ninsho *Ninsho[T]) MakeAuthURL() (string, string, error) {
 		return "", "", err
 	}
 
+	_ninsho.Session.Nonce = nonce
+
 	values := url.Values{}
 	values.Add("response_type", "code")
 	values.Add("client_id", _ninsho.Provider.ClientID)
@@ -160,6 +163,10 @@ func (_ninsho *Ninsho[T]) Auth(code string, state string) (*T, error) {
 	var token Token
 
 	provider := _ninsho.Provider
+
+	if _ninsho.Session == nil || _ninsho.Session.Nonce == "" {
+		return nil, fmt.Errorf("missing OIDC nonce")
+	}
 
 	if state != _ninsho.Session.State {
 		return nil, fmt.Errorf("state is wrong: %v", state)
@@ -215,6 +222,7 @@ func (_ninsho *Ninsho[T]) Auth(code string, state string) (*T, error) {
 
 	values.Add("id_token", token.IdToken)
 	values.Add("client_id", provider.ClientID)
+	values.Add("nonce", _ninsho.Session.Nonce)
 
 	req, err = http.NewRequest(
 		"POST",
@@ -243,6 +251,16 @@ func (_ninsho *Ninsho[T]) Auth(code string, state string) (*T, error) {
 	b, err = io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, err
+	}
+
+	var claims struct {
+		Nonce string `json:"nonce"`
+	}
+	if err := json.Unmarshal(b, &claims); err != nil {
+		return nil, err
+	}
+	if claims.Nonce != _ninsho.Session.Nonce {
+		return nil, fmt.Errorf("ID token nonce mismatch")
 	}
 
 	err = json.Unmarshal(b, &jwt)
