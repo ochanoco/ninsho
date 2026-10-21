@@ -19,14 +19,14 @@ type NinshoGinPath struct {
 
 type NinshoGin[T any] struct {
 	Path     *NinshoGinPath
-	Domain   string
+	BaseUrl  string
 	Provider *ninsho.Provider
 	IdP      *ninsho.IdP[T]
 }
 
-func NewNinshoGin[T any](r *gin.RouterGroup, provider *ninsho.Provider, idp *ninsho.IdP[T], domain string, path *NinshoGinPath) (*NinshoGin[T], error) {
+func NewNinshoGin[T any](r *gin.RouterGroup, provider *ninsho.Provider, idp *ninsho.IdP[T], baseUrl string, path *NinshoGinPath) (*NinshoGin[T], error) {
 	ninshoGin := NinshoGin[T]{
-		Domain:   domain,
+		BaseUrl:  baseUrl,
 		Path:     path,
 		Provider: provider,
 		IdP:      idp,
@@ -37,16 +37,16 @@ func NewNinshoGin[T any](r *gin.RouterGroup, provider *ninsho.Provider, idp *nin
 	return &ninshoGin, nil
 }
 
-func DefaultNinshoGin[T any](r *gin.RouterGroup, provider *ninsho.Provider, idp *ninsho.IdP[T], domain string) (*NinshoGin[T], error) {
+func DefaultNinshoGin[T any](r *gin.RouterGroup, provider *ninsho.Provider, idp *ninsho.IdP[T], baseUri string) (*NinshoGin[T], error) {
 	path := NinshoGinPath{
 		Unauthorized: "/unauthorized",
 		Callback:     "/callback",
 		AfterAuth:    "/",
 	}
 
-	provider.RedirectUri = domain + path.Callback
+	provider.RedirectUri = baseUri + path.Callback
 
-	return NewNinshoGin[T](r, provider, idp, domain, &path)
+	return NewNinshoGin(r, provider, idp, baseUri, &path)
 }
 
 func (_ninsho *NinshoGin[T]) AuthMiddleware() gin.HandlerFunc {
@@ -64,7 +64,7 @@ func (_ninsho *NinshoGin[T]) AuthMiddleware() gin.HandlerFunc {
 }
 
 func (_ninsho *NinshoGin[T]) Login(c *gin.Context) {
-	n, err := ninsho.InitNinsho[T](_ninsho.Provider, _ninsho.IdP)
+	n, err := ninsho.InitNinsho(_ninsho.Provider, _ninsho.IdP)
 	if err != nil {
 		panic(err)
 	}
@@ -96,7 +96,7 @@ func (_ninsho *NinshoGin[T]) Callback(r *gin.RouterGroup) {
 			panic(err)
 		}
 
-		n := ninsho.NewNinsho[T](_ninsho.Provider, _ninsho.IdP, stateSession)
+		n := ninsho.NewNinsho(_ninsho.Provider, _ninsho.IdP, stateSession)
 
 		jwt, err := n.Auth(code, state)
 		if err != nil {
