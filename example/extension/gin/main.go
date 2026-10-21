@@ -13,7 +13,7 @@ import (
 	gin_ninsho "github.com/ochanoco/ninsho/extension/gin"
 )
 
-var DOMAIN = os.Getenv("NINSHO_BASE")
+var BASE_URI = os.Getenv("NINSHO_BASE_URI")
 var CLIENT_ID = os.Getenv("NINSHO_CLIENT_ID")
 var CLIENT_SECRET = os.Getenv("NINSHO_CLIENT_SECRET")
 
@@ -30,7 +30,7 @@ func main() {
 		UsePKCE:      true,
 	}
 
-	_ninsho, err := gin_ninsho.DefaultNinshoGin(&r.RouterGroup, &provider, &ninsho.LINE_LOGIN, DOMAIN)
+	_ninsho, err := gin_ninsho.DefaultNinshoGin(&r.RouterGroup, &provider, &ninsho.LINE_LOGIN, BASE_URI)
 	if err != nil {
 		panic(err)
 	}
